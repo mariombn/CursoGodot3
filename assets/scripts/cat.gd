@@ -24,6 +24,7 @@ func _physics_process(delta):
 		if is_on_floor():
 			linear_velocity.x = 0
 			if is_jumping:
+				$audio_jump.play()
 				linear_velocity.y = JUMP_FORCE
 		elif is_moving:
 			linear_velocity.x = SPEED
@@ -31,11 +32,62 @@ func _physics_process(delta):
 			linear_velocity.x = 0
 			
 		is_jumping = false
-		
+		 
 		if position.y > get_viewport_rect().size.y:
-			#TODO: Chamar a condição de morte do jogador
-			pass
+			dead()
 	
-	linear_velocity = move_and_slide(linear_velocity, Vector2(0,-1))
+	#linear_velocity = move_and_slide(linear_velocity, Vector2(0,-1))
+	move_and_slide(linear_velocity, Vector2(0,-1))
 	
-	#TODO: Chamar as animações do personagem
+	play_animations()
+
+func _input(event):
+	if event is InputEventScreenTouch:
+		if event.pressed:
+			is_moving = true and is_on_floor()
+			is_jumping = true
+		else:
+			is_moving = false
+			
+
+func play_animations():
+	if is_alive:
+		if is_on_floor():
+			$animation.play("idle")
+		else:
+			if linear_velocity.y > 0:
+				$animation.play("fall")
+			if linear_velocity.y < 0:
+				$animation.play("jump")
+	else:
+		$animation.play("dead")
+
+func dead():
+	if is_alive:
+		$audio_death.play()
+		is_alive = false
+		linear_velocity = Vector2(0, JUMP_FORCE)
+		get_tree().call_group("hud_group", "game_over")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
